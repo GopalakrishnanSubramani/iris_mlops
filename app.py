@@ -7,7 +7,7 @@ from sklearn.preprocessing import LabelEncoder
 
 app = Flask(__name__)
 
-data = pd.read_csv("app/IRIS.csv")
+data = pd.read_csv("IRIS.csv")
 dispatch_model = {"RF": "RF.bin", "SVM" : "SVM.bin", "XGB" : "XGB.pkl"}
 
 #Encoding the data
@@ -30,23 +30,6 @@ class NpEncoder(json.JSONEncoder):
 def home():
     return  render_template('home.html')
 
-#for test in postman
-@app.route('/predict_api', methods=['POST'])
-def predict_api():
-    data=request.json
-    print(data)
-    model = request.json["Model"]
-    data_ = [j for key, val in data.items() if not key=='Model' for j in val.values()]
-
-    #loading model and scaling
-    Xg_model = joblib.load(dispatch_model[model])
-    scaling = joblib.load("scaling.bin")
-
-    #make predictions
-    new_data = scaling.transform(np.array(data_).reshape(1,-1))
-    print(Xg_model.predict(new_data))
-    output = le.inverse_transform(Xg_model.predict(new_data))
-    return json.dumps(output,default=str)
 
 @app.route('/predict',methods=['POST'])
 def predict():
