@@ -75,9 +75,9 @@ python ./app.py
 </p>
 
 
-## 🎯 Link for video hosting Flask Application
+## 🎯 Link for deployment guide on AWS Apprunner
  ```sh
-https://www.linkedin.com/posts/gopalakrishnan-subramani-a0974582_cars-pytorch-flask-activity-7029108228240121856-yIsP?utm_source=share&utm_medium=member_desktop
+https://drive.google.com/file/d/118slzAGcyL5uXlo7pr4fls6Rs35VdtAe/view?usp=share_link
 ```
 
 ## 📜 LICENSE
