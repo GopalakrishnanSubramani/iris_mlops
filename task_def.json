@@ -1,0 +1,37 @@
+{
+    "executionRoleArn": "arn:aws:iam::407690876963:role/ecsTaskExecutionRole",
+    "containerDefinitions" : [ 
+        { "logConfiguration": { 
+
+            "logDriver" : "awslogs",
+            "options" : {
+                "awslogs-group": "ecs/my-task-def",
+                "awslogs-region": "us-west-2",
+                "awslogs-stream-prefix": "ecs"
+            }
+        },
+        "entryPoint": [],
+        "portMappings": [
+            {
+                "hostPort": 5000,
+                "protocol": "tcp",
+                "containerPort": 5000
+            }],
+            "command":[],
+            "cpu": 0,
+            "environment": [],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "image":"407690876963.dkr.ecr.us-west-2.amazonaws.com/krish:latest",
+            "name": "tfweb_app"
+}],
+"placementConstraints": [],
+"memory":"512",
+"family": "my-task-def",
+"requiresCompatibilities":[
+    "FARGATE"
+],
+"networkMode": "awsvpc",
+"cpu":"256",
+"volumes": []
+}

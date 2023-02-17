@@ -1,0 +1,43 @@
+image: docker:20.10.16
+
+variables:
+    IMAGE_NAME: krishgopal37/tfwebapp                           #declare the docker-repo as a variable to access through-out the pipeline
+    IMAGE_TAG: latest     
+    DOCKER_DRIVER: overlay2                                     #Tell docker CLI how to talk to Docker daemon.
+services:
+    - docker:20.10.16-dind                                      #docker deamon service to execute the docker comments
+
+stages:
+  - Build
+  - Deploy
+
+build_image:
+    stage: Build
+    image: docker:20.10.16                                      #overwrite the ruby image with docker                                 
+    variables:
+        DOCKER_TLS_CERTDIR: "/certs"                            #to share the same certificate for authentication
+    before_script:
+        - docker login -u $REGISTRY_USER -p $REGISTRY_PASS      #username and password are assigned as the global variables inside settings
+    script:
+        - docker build -t $IMAGE_NAME:$IMAGE_TAG .              #create the docker image from dcoker file
+        - docker push $IMAGE_NAME:$IMAGE_TAG
+
+
+deploy_aws_fargate:
+    stage : Deploy
+    script:                
+        - ntpd -q -p time.nist.gov #set time inside container
+        - apk add --no-cache curl jq python3 py-pip
+        - pip install awscli 
+        - docker login -u $REGISTRY_USER -p $REGISTRY_PASS
+        - docker pull $IMAGE_NAME:$IMAGE_TAG
+        - export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+        - export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+        - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION | tr -d '\r') #login to aws repo
+        - docker tag $IMAGE_NAME:$IMAGE_TAG 407690876963.dkr.ecr.us-west-2.amazonaws.com/krish:$IMAGE_TAG
+        - docker push 407690876963.dkr.ecr.us-west-2.amazonaws.com/krish:$IMAGE_TAG
+        - aws ecs register-task-definition --family $CI_AWS_ECS_TASK_DEFINITION --requires-compatibilities FARGATE --cpu 256 --memory 512 --cli-input-json file://task_def.json --region $AWS_DEFAULT_REGION
+        - aws ecs update-service --cluster $CI_AWS_ECS_CLUSTER --service $CI_AWS_ECS_SERVICE --task-definition $CI_AWS_ECS_TASK_DEFINITION --region $AWS_DEFAULT_REGION
+
+    only:
+      - master
